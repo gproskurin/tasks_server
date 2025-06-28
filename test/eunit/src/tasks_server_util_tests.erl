@@ -6,7 +6,9 @@
 
 
 json_test() ->
+    ?assertEqual(<<"{}">>, tasks_server_util:to_json(#{})),
     ?assertEqual(#{}, tasks_server_util:from_json(<<"{}">>)),
+
     ?assertEqual(
         #{<<"a">> => 1, <<"b">> => [2, 3]},
         tasks_server_util:from_json(<<"{\"a\":1, \"b\":[2,3]}">>)

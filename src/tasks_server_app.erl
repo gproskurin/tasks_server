@@ -10,6 +10,8 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
+    ok = tasks_server_schema:bootstrap(),
+
     Dispatch = cowboy_router:compile([
         {'_', [
             {<<"/tasks/sort">>, tasks_server_http_sort, []}
