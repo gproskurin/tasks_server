@@ -3,6 +3,8 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-include("include/tasks_server.hrl").
+
 -compile([export_all, nowarn_export_all]).
 
 
@@ -45,7 +47,8 @@ test_combine_empty(_Config) ->
 
 -spec http_post(Path :: iodata(), Data :: map()) -> {Code :: integer(), Body :: map()}.
 http_post(Path, Data) ->
-    Url = [<<"http://localhost:30800/">>, Path],
+    Url = [<<"http://localhost:">>, erlang:integer_to_binary(?TASKS_SERVER_PORT), $/, Path],
+    ct:pal("URL:~p", [Url]),
     Headers = [{"Accept", "application/json"}],
     {ok, {{_, Code, _}, _Headers, Body}} = httpc:request(
         post,

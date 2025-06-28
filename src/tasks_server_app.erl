@@ -9,6 +9,9 @@
 
 -export([start/2, stop/1]).
 
+-include("include/tasks_server.hrl").
+
+
 start(_StartType, _StartArgs) ->
     ok = tasks_server_schema:bootstrap(),
 
@@ -20,9 +23,10 @@ start(_StartType, _StartArgs) ->
     ]),
     {ok, _} = cowboy:start_clear(
         tasks_server_http_listener,
-        [{port, 30800}],
+        [{port, ?TASKS_SERVER_PORT}],
         #{env => #{dispatch => Dispatch}}
     ),
+
     tasks_server_sup:start_link().
 
 
