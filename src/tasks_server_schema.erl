@@ -37,7 +37,12 @@ schema(tasks_combine) ->
     #{
         <<"type">> => <<"object">>,
         <<"additionalProperties">> => true,
-        <<"properties">> => #{}
+        <<"properties">> => #{
+            <<"tasks">> => #{
+                <<"type">> => <<"array">>,
+                <<"items">> => schema_task()
+            }
+        }
     }.
 
 schema_task() ->

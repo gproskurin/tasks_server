@@ -17,8 +17,8 @@ start(_StartType, _StartArgs) ->
 
     Dispatch = cowboy_router:compile([
         {'_', [
-            {<<"/tasks/sort">>, tasks_server_http_sort, []}
-            %{<<"/tasks/combine">>, tasks_server_http_combine, []}
+            {<<"/tasks/sort">>, tasks_server_http_sort, []},
+            {<<"/tasks/combine">>, tasks_server_http_combine, []}
         ]}
     ]),
     {ok, _} = cowboy:start_clear(

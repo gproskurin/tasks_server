@@ -52,8 +52,13 @@ json_request(Req0, State) ->
     ReqData = tasks_server_util:from_json(ReqDataBin),
     {Code, Result} = case tasks_server_schema:validate(tasks_sort, ReqData) of
         ok ->
-            R = #{<<"result">> => ReqData},
-            {200, R};
+            Tasks = maps:get(<<"tasks">>, ReqData),
+            case tasks_server_util:tasks_sort(Tasks, <<"name">>, <<"requires">>) of
+                {ok, TasksSorted} ->
+                    {200, #{<<"result">> => TasksSorted}};
+                {error, {cycle, NamesCycle}} ->
+                    {400, #{<<"error">> => <<"cycle">>, <<"tasks_cycle">> => NamesCycle}}
+            end;
         error ->
             R = #{<<"error">> => <<"invalid_json_schema">>}, % TODO return more details
             {400, R}

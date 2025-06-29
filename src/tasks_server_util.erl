@@ -4,7 +4,8 @@
     from_json/1,
     to_json/1,
 
-    tasks_sort/3
+    tasks_sort/3,
+    tasks_combine/4
 ]).
 
 
@@ -111,6 +112,18 @@ tasks_sort(Tasks, NameKey, DepsKey) ->
 task_reconstruct(Name, TasksIdx) ->
     Task = maps:get(Name, TasksIdx),
     maps:without([<<"requires">>], Task). % cleanup result
+
+
+% returns iolist
+tasks_combine(Tasks, NameKey, DepsKey, CmdKey) ->
+    Prefix = <<"#!/usr/bin/env bash\n">>,
+    case tasks_sort(Tasks, NameKey, DepsKey) of
+        {ok, SortedTasks} ->
+            Cmds = [[C, <<"\n">>] || #{CmdKey := C} <- SortedTasks],
+            {ok, [Prefix, Cmds]};
+        {error, _} = Err ->
+            Err
+    end.
 
 
 -ifdef(TEST).
