@@ -1,0 +1,25 @@
+{
+  "tasks": [
+    {
+      "name": "name1",
+      "command": "tar -xvf task1.tar",
+      "requires": [
+        "name2",
+        "name3"
+      ]
+    },
+    {
+      "name": "name2",
+      "command": "touch /tmp/task_2_complete",
+      "requires": []
+    },
+    {
+      "name": "name3",
+      "command": "ping -c1 task3-server.example.com"
+    },
+    {
+      "name": "name4",
+      "command": "unzip task4_data.zip"
+    }
+  ]
+}

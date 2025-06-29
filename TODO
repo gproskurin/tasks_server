@@ -1,0 +1,16 @@
+- cleanup cowboy code
+  - start code, move under our application supervisor?
+  - unify cowboy handlers: validation, error reporting, polish
+  - content-type: mix of json and text in different endpoint. Better?
+- common tests: add small stress-test
+- use native erlang json module for OTP>=27 ?
+- separate "generic" utils (json, ...) from "tasks sorting" utils
+- more tasks validation:
+  - check task names are unique
+  - check all tasks in "requires" exist - no "dangling" tasks
+- tasks sort:
+  - algorithm looks a bit complicated, think about better algorithm or reuse something which already exists, (erlang/digraph?)
+    or just implement proper topo_sort for graph
+- better types/specs documentation
+- logging
+
