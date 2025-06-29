@@ -30,7 +30,8 @@ schema(tasks_sort) ->
                 <<"type">> => <<"array">>,
                 <<"items">> => schema_task()
             }
-        }
+        },
+        <<"required">> => [<<"tasks">>]
     };
 
 schema(tasks_combine) ->
@@ -42,7 +43,8 @@ schema(tasks_combine) ->
                 <<"type">> => <<"array">>,
                 <<"items">> => schema_task()
             }
-        }
+        },
+        <<"required">> => [<<"tasks">>]
     }.
 
 schema_task() ->
