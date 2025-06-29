@@ -100,5 +100,37 @@ tasks_sort_test() ->
         TasksSort([T4,T5])
     ).
 
+
+tasks_combine_test() ->
+    TasksCombine = fun(Tasks) ->
+        {ok, R} = tasks_server_util:tasks_combine(Tasks, <<"name">>, <<"requires">>, <<"command">>),
+        erlang:iolist_to_binary(R)
+    end,
+
+    ?assertEqual(
+        <<"#!/usr/bin/env bash\n">>,
+        TasksCombine([])
+    ),
+
+    T1 = #{<<"name">> => <<"t1">>, <<"requires">> => [<<"t2">>], <<"command">> => <<"cmd1">>},
+    T2 = #{<<"name">> => <<"t2">>, <<"command">> => <<"cmd2">>},
+    Exp = <<"#!/usr/bin/env bash\ncmd2\ncmd1\n">>,
+    ?assertEqual(
+        Exp,
+        TasksCombine([T1,T2])
+    ),
+    ?assertEqual(
+        Exp,
+        TasksCombine([T2,T1])
+    ),
+
+    % cycle
+    Tcycle1 = #{<<"name">> => <<"t1">>,  <<"command">> => <<"c1">>},
+    Tcycle2 = #{<<"name">> => <<"t2">>, <<"requires">> => [<<"t3">>], <<"command">> => <<"c2">>},
+    Tcycle3 = #{<<"name">> => <<"t3">>, <<"requires">> => [<<"t2">>], <<"command">> => <<"c3">>},
+    {error, {cycle, Tc}} = tasks_server_util:tasks_combine([Tcycle1,Tcycle2,Tcycle3], <<"name">>, <<"requires">>, <<"command">>),
+    ?assertEqual(lists:sort([<<"t2">>,<<"t3">>]), lists:sort(Tc)).
+
+
 -endif.
 
