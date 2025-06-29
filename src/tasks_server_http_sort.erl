@@ -6,11 +6,13 @@
 -export([
     init/2,
     allowed_methods/2,
+    content_types_accepted/2,
     content_types_provided/2
 ]).
 
 -export([
-    handle_from_json/2
+    json_request/2,
+    json_response/2
 ]).
 
 -include_lib("kernel/include/logger.hrl").
@@ -21,20 +23,47 @@ init(Req, State) ->
 
 
 allowed_methods(Req, State) ->
-    {[<<"GET">>], Req, State}.
+    {[<<"POST">>], Req, State}.
 
 
-content_types_provided(Req, State) ->
+content_types_accepted(Req, State) ->
     {
         [
-            {{<<"application">>, <<"json">>, []}, handle_from_json}
+            {{<<"application">>, <<"json">>, []}, json_request}
         ],
         Req,
         State
     }.
 
 
-handle_from_json(Req, State) ->
-    Resp = #{<<"hello">> => <<"from ts">>},
-    {tasks_server_util:to_json(Resp), Req, State}.
+content_types_provided(Req, State) ->
+    {
+        [
+            {{<<"application">>, <<"json">>, []}, json_response}
+        ],
+        Req,
+        State
+    }.
+
+
+json_request(Req0, State) ->
+    {ok, ReqDataBin, Req} = cowboy_req:read_body(Req0),
+
+    ReqData = tasks_server_util:from_json(ReqDataBin),
+    {Code, Result} = case tasks_server_schema:validate(tasks_sort, ReqData) of
+        ok ->
+            R = #{<<"result">> => ReqData},
+            {200, R};
+        error ->
+            R = #{<<"error">> => <<"invalid_json_schema">>}, % TODO return more details
+            {400, R}
+    end,
+
+    Resp = cowboy_req:set_resp_body(tasks_server_util:to_json(Result), Req),
+    cowboy_req:reply(Code, Resp),
+    {stop, Resp, State}.
+
+
+json_response(Req, State) ->
+    {true, Req, State}.
 

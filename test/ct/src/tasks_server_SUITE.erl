@@ -10,15 +10,21 @@
 
 all() -> [
     {group, sort_tests},
-    {group, combine_tests}
+    {group, combine_tests},
+    {group, stress_tests}
 ].
 
 groups() -> [
     {sort_tests, [parallel], [
-        test_sort_empty
+        test_sort_empty,
+        test_sort_invalid_schema,
+        test_sort_real
     ]},
     {combine_tests, [parallel], [
         test_combine_empty
+    ]},
+    {stress_tests, [], [
+        test_stress
     ]}
 ].
 
@@ -41,7 +47,33 @@ test_sort_empty(_Config) ->
     ).
 
 
+test_sort_invalid_schema(_Config) ->
+    Data = #{<<"tasks">> => 42},
+    ?assertMatch(
+        {400, #{<<"error">> := <<"invalid_json_schema">>}},
+        http_post(<<"tasks/sort">>, Data)
+    ).
+
+
+test_sort_real(_Config) ->
+    Data = #{<<"tasks">> => [
+        #{
+            <<"name">> => <<"t1">>,
+            <<"command">> => <<"echo rm -rf /">>,
+            <<"requires">> => []
+        }
+    ]},
+    Exp = #{<<"result">> => Data},
+    ?assertEqual(
+        {200, Exp},
+        http_post(<<"tasks/sort">>, Data)
+    ).
+
 test_combine_empty(_Config) ->
+    ok.
+
+test_stress(_Config) ->
+    % TODO run many requests at the same time in parallel, for a few seconds
     ok.
 
 
@@ -49,6 +81,7 @@ test_combine_empty(_Config) ->
 http_post(Path, Data) ->
     Url = [<<"http://localhost:">>, erlang:integer_to_binary(?TASKS_SERVER_PORT), $/, Path],
     ct:pal("URL:~p", [Url]),
+    ct:pal("URL_FULL:~p", [erlang:iolist_to_binary(Url)]),
     Headers = [{"Accept", "application/json"}],
     {ok, {{_, Code, _}, _Headers, Body}} = httpc:request(
         post,
