@@ -60,6 +60,7 @@ json_request(Req0, State) ->
                     {400, #{<<"error">> => <<"cycle">>, <<"tasks_cycle">> => NamesCycle}}
             end;
         error ->
+            % invalid schema, report error
             R = #{<<"error">> => <<"invalid_json_schema">>}, % TODO return more details
             {400, R}
     end,

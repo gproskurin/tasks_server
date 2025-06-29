@@ -58,6 +58,7 @@ json_request(Req0, State) ->
             case tasks_server_util:tasks_combine(Tasks, <<"name">>, <<"requires">>, <<"command">>) of
                 {ok, Cmd} ->
                     Resp1 = cowboy_req:set_resp_body(Cmd, Req),
+                    % will reply with text/plain data: replace "json" header with "text"
                     Resp2 = cowboy_req:delete_resp_header(<<"content-type">>, Resp1),
                     Resp3 = cowboy_req:set_resp_header(<<"content-type">>, <<"text/plain">>, Resp2),
                     {200, Resp3};
@@ -66,6 +67,7 @@ json_request(Req0, State) ->
                     {400, cowboy_req:set_resp_body(tasks_server_util:to_json(Err), Req)}
             end;
         error ->
+            % invalid schema, report error
             Err = #{<<"error">> => <<"invalid_json_schema">>},
             {400, cowboy_req:set_resp_body(tasks_server_util:to_json(Err), Req)}
     end,

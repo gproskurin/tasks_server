@@ -28,6 +28,7 @@ maps_list_idx(Maps, Key) ->
     ).
 
 
+% collect tasks' dependencies
 tasks_deps(Tasks, NameKey, DepsKey) ->
     lists:foldl(
         fun(Task, Acc) ->
@@ -40,13 +41,17 @@ tasks_deps(Tasks, NameKey, DepsKey) ->
     ).
 
 
+-spec tasks_add_iter([TaskName], sets:set(TaskName), TaskDeps :: map(), Result :: [TaskName]) ->
+    false
+    | {Result :: [TaskName], Skipped :: [TaskName], AllNamesAdded :: sets:set(TaskName)}.
+% do one pass over list of tasks names: if task's deps are added already, add task to result
 tasks_add_iter(NamesTodo, AllNamesAdded, TasksDeps, Result) ->
     R = lists:foldl(
         fun(Name, {AccHaveProgress, AccResult, AccSkipped, AccAllNamesAdded}) ->
             Deps = maps:get(Name, TasksDeps),
             case sets:is_subset(Deps, AccAllNamesAdded) of
                 true ->
-                    % all deps of "Name" task are already added, we can add it to "added" result
+                    % all deps of "Name" task are already added, we can add it to result
                     % made some progress
                     {true, [Name|AccResult], AccSkipped, sets:add_element(Name, AccAllNamesAdded)};
                 false ->
